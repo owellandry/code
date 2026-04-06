@@ -1,95 +1,149 @@
 import React from 'react';
-import type { SidebarProps, FileNode } from './sidebar.shared';
-import { VscChevronRight, VscChevronDown, VscSearch, VscNewFile, VscNewFolder, VscTrash, VscAdd } from 'react-icons/vsc';
-import { FaHtml5, FaCss3Alt, FaJs } from 'react-icons/fa';
-import { FcFolder, FcOpenedFolder } from 'react-icons/fc';
-import { DiReact } from 'react-icons/di';
-
-const getFileIcon = (iconType?: string) => {
-  switch (iconType) {
-    case 'js': return <FaJs className="text-yellow-400 mr-2" />;
-    case 'css': return <FaCss3Alt className="text-blue-400 mr-2" />;
-    case 'html': return <FaHtml5 className="text-orange-500 mr-2" />;
-    case 'blue-folder': return <FcFolder className="text-blue-400 mr-2" />;
-    case 'yellow-folder': return <FcFolder className="text-yellow-400 mr-2" />;
-    case 'green-folder': return <FcFolder className="text-green-500 mr-2" />;
-    case 'orange-folder': return <FcFolder className="text-orange-400 mr-2" />;
-    default: return <VscChevronRight className="text-textMuted mr-2 opacity-0" />;
-  }
-};
+import type { SidebarProps } from './sidebar.shared';
+import {
+  VscChevronDown,
+  VscChevronRight,
+  VscSearch,
+  VscNewFile,
+  VscNewFolder,
+  VscTrash,
+  VscFolder,
+  VscFolderOpened,
+} from 'react-icons/vsc';
+import { getFileIconComponent } from '../core/icon-map';
 
 const renderTree = (
-  nodes: FileNode[], 
-  level: number, 
-  activeId: string, 
-  onFileClick: (id: string) => void, 
+  nodes: SidebarProps['files'],
+  level: number,
+  activeId: string,
+  onFileClick: (id: string) => void,
   onToggleFolder: (id: string) => void
-) => {
-  return nodes.map(node => {
+) =>
+  nodes.map((node) => {
     const isFolder = node.type === 'folder';
     const isActive = node.id === activeId;
-    const paddingLeft = `${level * 16 + 16}px`;
+    const Icon = getFileIconComponent(node.iconType);
 
     return (
       <div key={node.id}>
-        <div 
-          className={`flex items-center py-1 cursor-pointer transition text-sm ${
-            isActive 
-              ? 'bg-[#352c24] text-orange-400 font-medium border-l-2 border-orange-500' 
-              : 'text-textMuted hover:bg-[#2a2a2a] hover:text-white border-l-2 border-transparent'
+        <button
+          type="button"
+          className={`flex h-10 w-full items-center rounded-xl pr-3 text-left text-[15px] transition ${
+            isActive ? 'bg-[#3a2b20] text-[#ffb066]' : 'text-[#bcc1ca] hover:bg-[#212224] hover:text-white'
           }`}
-          style={{ paddingLeft }}
-          onClick={() => isFolder ? onToggleFolder(node.id) : onFileClick(node.id)}
+          style={{ paddingLeft: `${14 + level * 20}px` }}
+          onClick={() => (isFolder ? onToggleFolder(node.id) : onFileClick(node.id))}
         >
           {isFolder ? (
-            node.isOpen ? <VscChevronDown className="text-textMuted mr-1" /> : <VscChevronRight className="text-textMuted mr-1" />
+            node.isOpen ? (
+              <VscChevronDown className="mr-1 text-[#7f8791]" />
+            ) : (
+              <VscChevronRight className="mr-1 text-[#7f8791]" />
+            )
           ) : (
-            <div className="w-4 h-4 mr-1"></div>
+            <span className="mr-1 inline-block w-4" />
           )}
-          
           {isFolder ? (
-            node.isOpen ? <FcOpenedFolder className="mr-2" /> : <FcFolder className="mr-2" />
-          ) : getFileIcon(node.iconType)}
-          
-          <span>{node.name}</span>
-        </div>
+            node.isOpen ? (
+              <VscFolderOpened className="mr-2 text-[#dde2ea]" />
+            ) : (
+              <VscFolder className="mr-2 text-[#dde2ea]" />
+            )
+          ) : (
+            <Icon className="mr-2 text-[18px]" />
+          )}
+          <span className={level === 0 ? 'font-semibold text-white' : ''}>{node.name}</span>
+        </button>
         {isFolder && node.isOpen && node.children && (
-          <div>{renderTree(node.children, level + 1, activeId, onFileClick, onToggleFolder)}</div>
+          <div className="mt-1">{renderTree(node.children, level + 1, activeId, onFileClick, onToggleFolder)}</div>
         )}
       </div>
     );
   });
-};
 
-export const SidebarVisual: React.FC<SidebarProps> = ({ files, activeFileId, onFileClick, onToggleFolder }) => {
+export const SidebarVisual: React.FC<SidebarProps> = ({
+  files,
+  activeFileId,
+  onFileClick,
+  onToggleFolder,
+}) => {
+  const [width, setWidth] = React.useState(260);
+  const isResizing = React.useRef(false);
+
+  const handleMouseMove = React.useCallback((e: MouseEvent) => {
+    if (!isResizing.current) return;
+    // El sidebar está después del Activity Bar (56px) y un pequeño gap
+    const sidebarX = 56 + 12; // Aproximadamente 68px desde el borde izquierdo
+    const newWidth = e.clientX - sidebarX;
+    if (newWidth > 150 && newWidth < 500) {
+      setWidth(newWidth);
+    }
+  }, []);
+
+  const stopResizing = React.useCallback(() => {
+    isResizing.current = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResizing);
+    document.body.style.cursor = 'default';
+  }, [handleMouseMove]);
+
+  const startResizing = React.useCallback(() => {
+    isResizing.current = true;
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', stopResizing);
+    document.body.style.cursor = 'col-resize';
+  }, [handleMouseMove, stopResizing]);
+
+  React.useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', stopResizing);
+    };
+  }, [handleMouseMove, stopResizing]);
+
   return (
-    <div className="w-64 bg-bgSidebar flex flex-col border-r border-[#2a2a2a]">
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2 bg-[#2d2d2d] px-3 py-1.5 rounded-md cursor-pointer hover:bg-[#353535] transition">
-          <div className="w-4 h-4 bg-green-600 rounded-sm flex items-center justify-center">
-             <DiReact className="text-white text-xs" />
+    <aside 
+      className="relative flex shrink-0 flex-col bg-transparent"
+      style={{ width: `${width}px` }}
+    >
+      <div className="m-1.5 flex min-h-0 flex-1 flex-col rounded-xl bg-[#17181a]">
+        <div className="p-1.5">
+          <div className="flex items-center gap-1.5">
+            <div className="flex flex-1 items-center gap-2 rounded-xl border border-white/5 bg-[#111214] px-3 py-2">
+              <VscSearch className="text-lg text-[#7f8791]" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-transparent text-[14px] text-white outline-none placeholder:text-[#7f8791]"
+              />
+            </div>
+            <button type="button" className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111214] text-[#8c929d] transition hover:bg-[#262729] hover:text-white">
+              <VscNewFile className="text-lg" />
+            </button>
+            <button type="button" className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111214] text-[#8c929d] transition hover:bg-[#262729] hover:text-white">
+              <VscNewFolder className="text-lg" />
+            </button>
+            <button type="button" className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111214] text-[#8c929d] transition hover:bg-[#262729] hover:text-white">
+              <VscTrash className="text-lg" />
+            </button>
           </div>
-          <span className="text-sm font-semibold text-white">merlinDev</span>
-          <VscChevronDown className="text-xs text-textMuted" />
         </div>
-        <div className="w-7 h-7 flex items-center justify-center bg-[#2d2d2d] rounded-md cursor-pointer hover:bg-[#353535] transition text-white">
-          <VscAdd className="text-sm" />
-        </div>
-      </div>
-      
-      <div className="px-4 pb-2">
-        <div className="flex items-center bg-[#1a1a1a] rounded-md px-2 py-1.5 border border-[#333]">
-          <VscSearch className="text-textMuted text-sm" />
-          <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-xs text-textMain w-full ml-2 placeholder-textMuted" />
-          <VscNewFile className="text-textMuted text-sm ml-1 cursor-pointer hover:text-white" />
-          <VscNewFolder className="text-textMuted text-sm ml-1 cursor-pointer hover:text-white" />
-          <VscTrash className="text-textMuted text-sm ml-1 cursor-pointer hover:text-white" />
+
+        <div className="flex-1 overflow-y-auto m-1.5 mt-0 rounded-xl border border-white/5 bg-[#111214] p-3">
+          <div className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-[#8a909a]">
+            <VscChevronDown className="text-sm opacity-50" />
+            <VscFolder className="text-base text-white" />
+            <span className="text-white">merlinDev</span>
+          </div>
+          {renderTree(files, 0, activeFileId, onFileClick, onToggleFolder)}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto mt-2 custom-scrollbar">
-        {renderTree(files, 0, activeFileId, onFileClick, onToggleFolder)}
-      </div>
-    </div>
+      {/* Resize Handle */}
+       <div
+         className="absolute -right-1 top-0 z-50 h-full w-2 cursor-col-resize transition-colors hover:bg-blue-500/20 active:bg-blue-500/40"
+         onMouseDown={startResizing}
+       />
+    </aside>
   );
 };

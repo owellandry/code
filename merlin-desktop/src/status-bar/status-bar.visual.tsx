@@ -1,34 +1,51 @@
 import React from 'react';
 import type { StatusBarProps } from './status-bar.shared';
-import { VscCode, VscShield, VscError, VscWarning, VscInfo, VscBell } from 'react-icons/vsc';
+import { VscBell, VscError, VscShield, VscWarning, VscRemote, VscRadioTower } from 'react-icons/vsc';
 
-export const StatusBarVisual: React.FC<StatusBarProps> = ({ errors, warnings, info }) => {
+export const StatusBarVisual: React.FC<StatusBarProps> = ({
+  errors,
+  warnings,
+  info,
+  line,
+  column,
+  indentation,
+  encoding,
+  eol,
+  languageLabel,
+}) => {
   return (
-    <div className="h-6 bg-[#007acc] text-white flex items-center justify-between text-[11px] z-50 px-2 font-sans select-none">
-      <div className="flex items-center space-x-3 h-full">
-        <div className="flex items-center space-x-1 cursor-pointer hover:bg-white/20 px-2 h-full transition">
-          <VscCode />
+    <footer className="z-50 flex h-6 items-center justify-between bg-[#111214] text-[11px] text-[#969696] select-none">
+      <div className="flex h-full items-center">
+        <div className="flex h-full w-8 items-center justify-center bg-[#2563eb] text-white transition hover:bg-[#3b82f6]">
+          <VscRemote className="text-[13px]" />
         </div>
-        <div className="flex items-center space-x-1 cursor-pointer hover:bg-white/20 px-2 h-full transition">
-          <VscShield />
+        
+        <div className="flex h-full items-center gap-1.5 border-r border-white/5 bg-white/[0.02] px-3 transition hover:bg-white/5 hover:text-white">
+          <VscShield className="text-[12px]" />
           <span>Restricted Mode</span>
         </div>
-        <div className="flex items-center space-x-2 cursor-pointer hover:bg-white/20 px-2 h-full transition">
-          <span className="flex items-center"><VscError className="mr-1 text-[10px]" /> {errors}</span>
-          <span className="flex items-center"><VscWarning className="mr-1 text-[10px]" /> {warnings}</span>
-          <span className="flex items-center"><VscInfo className="mr-1 text-[10px]" /> {info}</span>
+
+        <div className="flex h-full items-center gap-4 px-4 transition hover:bg-white/5">
+          <span className="flex items-center gap-1.5 hover:text-white">
+            <VscError className="text-[13px]" />
+            <span className="mt-0.5">{errors}</span>
+          </span>
+          <span className="flex items-center gap-1.5 hover:text-white">
+            <VscWarning className="text-[13px]" />
+            <span className="mt-0.5">{warnings}</span>
+          </span>
+          <span className="flex items-center gap-1.5 hover:text-white">
+            <VscRadioTower className="text-[13px]" />
+            <span className="mt-0.5">{info}</span>
+          </span>
         </div>
       </div>
-      <div className="flex items-center space-x-3 h-full">
-        <div className="cursor-pointer hover:bg-white/20 px-2 h-full flex items-center transition">Ln 12, Col 43</div>
-        <div className="cursor-pointer hover:bg-white/20 px-2 h-full flex items-center transition">Spaces: 2</div>
-        <div className="cursor-pointer hover:bg-white/20 px-2 h-full flex items-center transition">UTF-8</div>
-        <div className="cursor-pointer hover:bg-white/20 px-2 h-full flex items-center transition">CRLF</div>
-        <div className="cursor-pointer hover:bg-white/20 px-2 h-full flex items-center transition">HTML</div>
-        <div className="cursor-pointer hover:bg-white/20 px-2 h-full flex items-center transition">
-          <VscBell />
+
+      <div className="flex h-full items-center">
+        <div className="flex h-full w-10 items-center justify-center transition hover:bg-white/5 hover:text-white">
+          <VscBell className="text-[14px]" />
         </div>
       </div>
-    </div>
+    </footer>
   );
 };

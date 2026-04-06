@@ -1,86 +1,92 @@
 import React from 'react';
-import MonacoEditor from '@monaco-editor/react';
+import MonacoEditor, { type OnMount } from '@monaco-editor/react';
 import type { EditorProps } from './editor.shared';
-import { VscClose, VscLayout, VscBrowser, VscLayoutSidebarLeft, VscSettingsGear, VscSearch, VscPlay, VscBug, VscSplitHorizontal, VscEllipsis } from 'react-icons/vsc';
-import { FloatingToolbarMain } from '../floating-toolbar/floating-toolbar.main';
+import {
+  VscChromeClose,
+} from 'react-icons/vsc';
+import { getFileIconComponent } from '../core/icon-map';
 
-export const EditorVisual: React.FC<EditorProps> = ({ code, language, onChange, activeTabs, onTabClick, onTabClose }) => {
+const getTabStyle = (iconType: EditorProps['activeTabs'][number]['iconType'], isActive: boolean) => {
+  switch (iconType) {
+    case 'html':
+      return isActive
+        ? 'border-[#7a5331] bg-[linear-gradient(180deg,#382a1f,#2a211c)] text-white'
+        : 'border-white/10 bg-[#202123] text-[#c4c9d1]';
+    case 'css':
+      return isActive
+        ? 'border-[#39577e] bg-[linear-gradient(180deg,#213246,#1b252f)] text-white'
+        : 'border-white/10 bg-[#202123] text-[#c4c9d1]';
+    case 'js':
+      return isActive
+        ? 'border-[#72622f] bg-[linear-gradient(180deg,#342d1f,#27221b)] text-white'
+        : 'border-white/10 bg-[#202123] text-[#c4c9d1]';
+    default:
+      return isActive
+        ? 'border-[#444c5a] bg-[linear-gradient(180deg,#272b32,#1f2228)] text-white'
+        : 'border-white/10 bg-[#202123] text-[#c4c9d1]';
+  }
+};
+
+export const EditorVisual: React.FC<EditorProps> = ({
+  code,
+  language,
+  activeTabs,
+  onChange,
+  onTabClick,
+  onTabClose,
+  onCursorChange,
+}) => {
+  const handleMount: OnMount = (editor) => {
+    editor.onDidChangeCursorPosition((event) => {
+      onCursorChange(event.position.lineNumber, event.position.column);
+    });
+  };
+
   return (
-    <div className="flex-1 bg-[#1a1a1a] flex flex-col relative shadow-inner overflow-hidden">
-      
-      {/* Top Bar / Tabs */}
-      <div className="flex items-center justify-between bg-bgDark border-b border-[#2a2a2a] pr-4 h-10">
-        <div className="flex overflow-x-auto custom-scrollbar h-full">
-          {activeTabs.map(tab => {
-            const Icon = tab.icon;
+    <section className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#17181a]">
+      <div className="flex h-[58px] items-center border-b border-white/10 bg-[#17181a] px-6">
+        <div className="custom-scrollbar flex min-w-0 flex-1 items-center gap-3 overflow-x-auto py-3">
+          {activeTabs.map((tab) => {
+            const Icon = getFileIconComponent(tab.iconType);
+
             return (
-              <div 
+              <button
                 key={tab.id}
-                onClick={() => onTabClick(tab.id)}
-                className={`flex items-center px-4 h-full border-t-2 cursor-pointer text-sm transition group ${
-                  tab.isActive 
-                    ? 'bg-[#1a1a1a] border-orange-500 text-white' 
-                    : 'bg-[#222] border-transparent text-textMuted hover:bg-[#2a2a2a] hover:text-white'
-                }`}
+                type="button"
+                onClick={() => void onTabClick(tab.id)}
+                className={`group flex h-full min-w-fit items-center rounded-[20px] border px-5 text-[15px] transition ${getTabStyle(tab.iconType, tab.isActive)}`}
               >
-                <Icon className={`mr-2 ${tab.isActive ? 'text-orange-500' : 'text-blue-400'}`} />
-                {tab.name}
-                <VscClose 
-                  className="ml-3 hover:text-white opacity-0 group-hover:opacity-100 transition" 
-                  onClick={(e) => { e.stopPropagation(); onTabClose(tab.id); }} 
+                <Icon className="mr-2.5 text-[18px]" />
+                <span className={tab.iconType === 'css' ? 'italic' : ''}>{tab.name}</span>
+                <VscChromeClose
+                  className="ml-3 text-[#9aa1ad] opacity-0 transition group-hover:opacity-100 hover:text-white"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void onTabClose(tab.id);
+                  }}
                 />
-              </div>
+              </button>
             );
           })}
         </div>
-
-        <div className="flex items-center space-x-3">
-          {/* Avatars */}
-          <div className="flex -space-x-2">
-            <img className="w-7 h-7 rounded-full border border-bgDark" src="https://i.pravatar.cc/100?img=1" alt="User 1" />
-            <img className="w-7 h-7 rounded-full border border-bgDark" src="https://i.pravatar.cc/100?img=2" alt="User 2" />
-            <img className="w-7 h-7 rounded-full border border-bgDark" src="https://i.pravatar.cc/100?img=3" alt="User 3" />
-          </div>
-          <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-md font-medium transition shadow-lg shadow-blue-500/20">Collaboration</button>
-          
-          <div className="h-4 w-[1px] bg-[#333] mx-1"></div>
-          
-          <div className="flex space-x-2 text-textMuted">
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscLayout className="text-lg" /></div>
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscBrowser className="text-lg" /></div>
-            <div className="w-7 h-7 rounded bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-lg shadow-blue-500/20"><VscLayoutSidebarLeft className="text-lg" /></div>
-          </div>
-
-          <div className="h-4 w-[1px] bg-[#333] mx-1"></div>
-
-          <div className="flex space-x-2 text-textMuted">
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscSettingsGear className="text-lg" /></div>
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscSearch className="text-lg" /></div>
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscPlay className="text-lg" /></div>
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscBug className="text-lg" /></div>
-          </div>
-          
-          <div className="flex space-x-2 text-textMuted ml-2">
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscSplitHorizontal className="text-lg" /></div>
-            <div className="w-7 h-7 rounded hover:bg-[#2a2a2a] flex items-center justify-center cursor-pointer transition"><VscEllipsis className="text-lg" /></div>
-          </div>
-        </div>
       </div>
 
-      {/* Monaco Editor Container */}
-      <div className="flex-1 w-full h-full relative">
+      <div className="relative min-h-0 flex-1 bg-[#1b1c1e]">
         <MonacoEditor
           height="100%"
           language={language}
           theme="vs-dark"
           value={code}
           onChange={onChange}
+          onMount={handleMount}
           options={{
             minimap: { enabled: false },
-            fontSize: 14,
+            fontSize: 15,
             fontFamily: '"Fira Code", Consolas, Monaco, monospace',
-            lineHeight: 24,
-            padding: { top: 16 },
+            fontLigatures: true,
+            lineHeight: 28,
+            lineNumbersMinChars: 3,
+            padding: { top: 18 },
             scrollBeyondLastLine: false,
             smoothScrolling: true,
             cursorBlinking: 'smooth',
@@ -89,8 +95,6 @@ export const EditorVisual: React.FC<EditorProps> = ({ code, language, onChange, 
           }}
         />
       </div>
-
-      <FloatingToolbarMain />
-    </div>
+    </section>
   );
 };

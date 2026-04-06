@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useAppContext } from '../app/app.context';
 
 export const useStatusBarLogic = () => {
-  const [errors] = useState(0);
-  const [warnings] = useState(0);
-  const [info] = useState(0);
+  const { status } = useAppContext();
 
   return {
-    errors,
-    warnings,
-    info,
+    errors: status.errors,
+    warnings: status.warnings,
+    info: status.info,
+    line: status.line,
+    column: status.column,
+    indentation: status.indentation,
+    encoding: status.encoding,
+    eol: status.eol,
+    languageLabel: status.languageLabel,
   };
 };

@@ -1,34 +1,34 @@
 import { useState } from 'react';
-import { VscFiles, VscSearch, VscSourceControl, VscExtensions, VscDatabase, VscWarning, VscSettingsGear } from 'react-icons/vsc';
-import { SiReact } from 'react-icons/si';
+import {
+  VscFiles,
+  VscExtensions,
+  VscDatabase,
+  VscError,
+  VscSettingsGear,
+  VscSymbolEvent,
+} from 'react-icons/vsc';
 
 export const useActivityBarLogic = () => {
   const [activeId, setActiveId] = useState('explorer');
 
   const topItems = [
-    { id: 'logo', icon: SiReact, active: false }, // Placeholder for merlin logo
     { id: 'explorer', icon: VscFiles },
-    { id: 'search', icon: VscSearch },
-    { id: 'git', icon: VscSourceControl },
     { id: 'extensions', icon: VscExtensions },
+    { id: 'git', icon: VscSymbolEvent },
     { id: 'database', icon: VscDatabase },
   ];
 
   const bottomItems = [
-    { id: 'problems', icon: VscWarning },
+    { id: 'problems', icon: VscError },
     { id: 'settings', icon: VscSettingsGear },
   ];
-
-  const handleItemClick = (id: string) => {
-    if (id !== 'logo') {
-      setActiveId(id);
-    }
-  };
 
   return {
     topItems,
     bottomItems,
     activeId,
-    onItemClick: handleItemClick,
+    onItemClick: (id: string) => {
+      setActiveId(id);
+    },
   };
 };

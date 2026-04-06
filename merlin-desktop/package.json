@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "package": "npm run build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types tests/run.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

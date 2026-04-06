@@ -7,14 +7,27 @@ import { StatusBarMain } from '../status-bar/status-bar.main';
 
 export const LayoutVisual: React.FC = () => {
   return (
-    <div className="bg-bgDark text-textMain font-sans h-screen flex flex-col overflow-hidden select-none">
-      <TitleBarMain />
-      <div className="flex-1 flex overflow-hidden">
-        <ActivityBarMain />
-        <SidebarMain />
-        <EditorMain />
+    <div className="flex h-full flex-col overflow-hidden bg-[#0d0e10] p-1.5 font-sans text-textMain select-none">
+      <div className="mb-1.5 overflow-hidden rounded-xl border border-white/5 bg-[#161719] shadow-2xl">
+        <TitleBarMain />
       </div>
-      <StatusBarMain />
+      
+      <div className="flex min-h-0 flex-1 gap-1.5 overflow-hidden">
+        <div className="flex overflow-hidden rounded-xl border border-white/5 bg-[#111214] shadow-xl">
+          <ActivityBarMain />
+          <SidebarMain />
+        </div>
+        
+        <div className="flex flex-1 overflow-hidden rounded-xl border border-white/5 bg-[#111214] p-1.5 shadow-xl">
+          <div className="flex min-w-0 flex-1 overflow-hidden rounded-[10px] bg-[#17181a]">
+            <EditorMain />
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-1.5 overflow-hidden rounded-xl border border-white/5 bg-[#111214] shadow-lg">
+        <StatusBarMain />
+      </div>
     </div>
   );
 };

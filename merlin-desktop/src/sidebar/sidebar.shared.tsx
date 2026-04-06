@@ -1,13 +1,7 @@
-export interface FileNode {
-  id: string;
-  name: string;
-  type: 'file' | 'folder';
-  iconType?: string;
-  children?: FileNode[];
-  isOpen?: boolean;
-}
+import type { FileNode } from '../core/workspace-types';
 
 export interface SidebarProps {
+  workspaceName: string;
   files: FileNode[];
   activeFileId: string;
   onFileClick: (id: string) => void;

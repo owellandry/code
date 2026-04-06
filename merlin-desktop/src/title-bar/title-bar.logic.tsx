@@ -1,6 +1,15 @@
-import { useState } from 'react';
+import { useAppContext } from '../app/app.context';
 
 export const useTitleBarLogic = () => {
-  const [title] = useState('Merlin Editor');
-  return { title };
+  const { workspace, windowState, minimizeWindow, toggleMaximizeWindow, closeWindow } = useAppContext();
+
+  return {
+    title: workspace.appTitle,
+    workspaceName: workspace.workspaceName,
+    collaborators: workspace.collaborators,
+    isMaximized: windowState.isMaximized,
+    onMinimize: minimizeWindow,
+    onToggleMaximize: toggleMaximizeWindow,
+    onClose: closeWindow,
+  };
 };

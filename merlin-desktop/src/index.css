@@ -27,20 +27,12 @@
   background-color: #4f4f4f;
 }
 
-@keyframes float {
-  0% { transform: translate(-50%, 0px); }
-  50% { transform: translate(-50%, -5px); }
-  100% { transform: translate(-50%, 0px); }
-}
-.floating-toolbar-anim {
-  animation: float 4s ease-in-out infinite;
-}
-
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #1a1a1a;
+  background-color: #111214;
   color: #cccccc;
+  font-family: 'Segoe UI', Inter, system-ui, sans-serif;
 }
